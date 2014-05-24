@@ -43,6 +43,7 @@ module NavigateHokieSpa
     agent = args[:agent]
     page = args[:page]
     terms = agent.page.search('tr > td.delabel > p > b').reject{|term| term.to_s !~ /\d{4}/}
+
     terms
   end
 
@@ -54,7 +55,7 @@ module NavigateHokieSpa
     page = args[:page]
     drop_add = page.links.select{|link| link.text == "Drop/Add" }
     drop_add.uniq!{|link| link.href }
-    pp drop_add
+    drop_add
   end
 
 
@@ -80,32 +81,15 @@ class DropAddNavigator
     @form = hokie_spa_welcome_page(page_and_agent)
     @page = login(page_and_agent.merge({form: form}))
     @page = traverse_to_schedule(page_and_agent)
-    terms_available(page_and_agent)
-    drop_add_links(page_and_agent)
+    terms = terms_available(page_and_agent)
+    drop_add = drop_add_links(page_and_agent)
+    printTerms(terms,drop_add.length)
+  end
+
+  def printTerms(terms,length )
+    pp "Terms available: "
+    (0...length).each{|i| pp terms[i].content}
   end
 end
 
 
-
-class DropAddNavigator
-  include NavigateHokieSpa
-
-  attr_accessor :form,:page,:agent
-
-  def initialize
-    @agent = Mechanize.new
-
-  end
-
-  def page_and_agent
-    {page: @page, agent: @agent}
-  end
-
-  def navigate_to_drop_add
-    @form = hokie_spa_welcome_page(page_and_agent)
-    @page = login(page_and_agent.merge({form: form}))
-    @page = traverse_to_schedule(page_and_agent)
-    terms_available(page_and_agent)
-    drop_add_links(page_and_agent)
-  end
-end
