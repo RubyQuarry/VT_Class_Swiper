@@ -1,4 +1,5 @@
-
+require 'rubygems'
+require 'mechanize'
 
 module NavigateHokieSpa
 
@@ -6,7 +7,12 @@ module NavigateHokieSpa
 
   def hokie_spa_welcome_page(args = {})
     agent = args[:agent]
+    begin
     page = agent.get('http://hokiespa.vt.edu')
+    rescue Net::HTTP::Persistent::Error
+      pp "Unable to connect to Hokie Spa, the site may be down."
+    end
+
     page = agent.page.link_with(:text => 'Login to HokieSpa >>>').click
     page.forms()[0]
   end
@@ -56,4 +62,29 @@ module NavigateHokieSpa
   end
 
 
+end
+
+
+
+class DropAddNavigator
+  include NavigateHokieSpa
+
+  attr_accessor :form,:page,:agent
+
+  def initialize
+    @agent = Mechanize.new
+
+  end
+
+  def page_and_agent
+    {page: @page, agent: @agent}
+  end
+
+  def navigate_to_drop_add
+    @form = hokie_spa_welcome_page(page_and_agent)
+    @page = login(page_and_agent.merge({form: form}))
+    @page = traverse_to_schedule(page_and_agent)
+    terms_available(page_and_agent)
+    drop_add_links(page_and_agent)
+  end
 end
