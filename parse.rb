@@ -2,15 +2,17 @@ require 'rubygems'
 require 'mechanize'
 module NavigateHokieSpa
 
+  attr_reader :agent,:page
+
   def hokie_spa_welcome_page(args = {})
-    agent = args[:agent]
+    @agent = args[:agent]
     begin
     page = agent.get('http://hokiespa.vt.edu')
     rescue Net::HTTP::Persistent::Error
       pp "Unable to connect to Hokie Spa, the site may be down."
     end
-    page = agent.page.link_with(:text => 'Login to HokieSpa >>>').click
-    page.forms()[0]
+    @page = agent.page.link_with(:text => 'Login to HokieSpa >>>').click
+    @page.forms()[0]
   end
 
 
@@ -28,13 +30,13 @@ module NavigateHokieSpa
 
   #Find registration and schedule page.
   def traverse_to_schedule(args = {})
-    page = args[:page]
-    agent = args[:agent]
-    text_link =  page.links.map{|link| link.text.include?"Not Now"}
-    page = agent.page.link_with(:text =>  "\n      Not Now\n    ").click if text_link.include? true
-    page = agent.page.link_with(:text =>  "Hokie Spa").click if text_link.include? true
-    page = agent.page.link_with(:text => "Registration and Schedule").click
-    page
+    @page = args[:page]
+    @agent = args[:agent]
+    text_link = @page.links.map{|link| link.text.include?"Not Now"}
+    @page = agent.page.link_with(:text =>  "\n      Not Now\n    ").click if text_link.include? true
+    @page = agent.page.link_with(:text =>  "Hokie Spa").click if text_link.include? true
+    @page = agent.page.link_with(:text => "Registration and Schedule").click
+    @page
   end
 
 
@@ -42,9 +44,8 @@ module NavigateHokieSpa
   def terms_available(args = {})
     agent = args[:agent]
     page = args[:page]
-    terms = agent.page.search('tr > td.delabel > p > b').reject{|term| term.to_s !~ /\d{4}/}
-
-    terms
+    @terms = agent.page.search('tr > td.delabel > p > b').reject{|term| term.to_s !~ /\d{4}/}
+    @terms
   end
 
 
@@ -81,9 +82,9 @@ class DropAddNavigator
     @form = hokie_spa_welcome_page(page_and_agent)
     @page = login(page_and_agent.merge({form: form}))
     @page = traverse_to_schedule(page_and_agent)
-    terms = terms_available(page_and_agent)
+    terms_available(page_and_agent)
     drop_add = drop_add_links(page_and_agent)
-    printTerms(terms,drop_add.length)
+    printTerms(@terms,drop_add.length)
   end
 
   def printTerms(terms,length )
@@ -91,5 +92,7 @@ class DropAddNavigator
     (0...length).each{|i| pp terms[i].content}
   end
 end
+
+
 
 
