@@ -1,5 +1,5 @@
 
-require_relative 'parse'
+require_relative 'lib/parse'
 
 
 a = DropAddNavigator.new
