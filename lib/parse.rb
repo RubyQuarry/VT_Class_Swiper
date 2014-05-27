@@ -44,6 +44,7 @@ module NavigateHokieSpa
   def terms_available(args = {})
     agent = args[:agent]
     page = args[:page]
+    #Find class terms defined by the year.
     @terms = agent.page.search('tr > td.delabel > p > b').reject{|term| term.to_s !~ /\d{4}/}
     @terms
   end
