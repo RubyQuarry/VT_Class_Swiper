@@ -9,4 +9,4 @@ describe 'login behaviour' do
     expect("string").to include "str"
 
   end
-end‰
+end
